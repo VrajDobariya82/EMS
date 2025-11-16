@@ -10,11 +10,7 @@ export default function AdminPanel() {
   const isReportsRoute = location.pathname.includes('/reports');
   
   if (isReportsRoute) {
-    return (
-      <ReportsLayout>
-        <Outlet />
-      </ReportsLayout>
-    );
+    return <ReportsLayout />;
   }
   
   return <Dashboard onLogout={logout} />;

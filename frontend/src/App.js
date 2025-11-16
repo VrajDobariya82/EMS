@@ -319,16 +319,18 @@ function App() {
       <Route path="/" element={user ? <Navigate to={role === 'Admin' ? '/admin' : '/employee'} replace /> : <LandingPage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route element={<ProtectedRoute allowRoles={["Employee"]} />}>
-        <Route path="/employee" element={<EmployeePanel />} />
-        <Route path="/employee/reports" element={<MyReports />} />
+        <Route path="/employee" element={<EmployeePanel />}>
+          <Route path="reports" element={<MyReports />} />
+        </Route>
       </Route>
       <Route element={<ProtectedRoute allowRoles={["Admin"]} />}>
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/admin/reports" element={<AdminReportsHome />} />
-        <Route path="/admin/reports/employees" element={<EmployeeReport />} />
-        <Route path="/admin/reports/attendance" element={<AttendanceReport />} />
-        <Route path="/admin/reports/leaves" element={<LeaveReport />} />
-        <Route path="/admin/reports/payroll" element={<PayrollReport />} />
+        <Route path="/admin" element={<AdminPanel />}>
+          <Route path="reports" element={<AdminReportsHome />} />
+          <Route path="reports/employees" element={<EmployeeReport />} />
+          <Route path="reports/attendance" element={<AttendanceReport />} />
+          <Route path="reports/leaves" element={<LeaveReport />} />
+          <Route path="reports/payroll" element={<PayrollReport />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to={homeRedirect} replace />} />

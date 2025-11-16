@@ -10,11 +10,7 @@ export default function EmployeePanel() {
   const isReportsRoute = location.pathname.includes('/reports');
   
   if (isReportsRoute) {
-    return (
-      <ReportsLayout>
-        <Outlet />
-      </ReportsLayout>
-    );
+    return <ReportsLayout />;
   }
   
   return <Dashboard onLogout={logout} />;

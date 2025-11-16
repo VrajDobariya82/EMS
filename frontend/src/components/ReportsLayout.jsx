@@ -15,7 +15,7 @@ import {
 } from './Icons';
 import './Dashboard.css';
 
-const ReportsLayout = ({ children }) => {
+const ReportsLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { role, logout } = useContext(AuthContext);
@@ -123,7 +123,7 @@ const ReportsLayout = ({ children }) => {
 
       {/* Main Content - Show reports content */}
       <div className="main-content">
-        {children || <Outlet />}
+        <Outlet />
       </div>
     </div>
   );
