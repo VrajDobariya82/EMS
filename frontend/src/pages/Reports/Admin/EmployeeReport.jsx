@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { reportsApi } from '../../../api';
 import { UsersIcon, DocumentIcon } from '../../../components/Icons';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import '../Reports.css';
 
 const EmployeeReport = () => {
@@ -41,6 +43,146 @@ const EmployeeReport = () => {
     );
   }) || [];
 
+  const generatePDF = () => {
+    console.log('generatePDF called', { data, filteredEmployees: filteredEmployees.length });
+    try {
+      if (!data || !filteredEmployees.length) {
+        alert('No data available to export');
+        return;
+      }
+
+      console.log('Starting PDF generation...');
+      const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let yPosition = 20;
+
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(59, 130, 246); // Blue color
+    doc.setFont('helvetica', 'bold');
+    doc.text('Employee Report', pageWidth / 2, yPosition, { align: 'center' });
+    
+    yPosition += 10;
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, pageWidth / 2, yPosition, { align: 'center' });
+    
+    yPosition += 15;
+
+    // Statistics Section
+    if (data.statistics) {
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Summary Statistics', 14, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const stats = [
+        `Total Employees: ${data.statistics.total}`,
+        `Active: ${data.statistics.active}`,
+        `On Leave: ${data.statistics.onLeave}`,
+        `Terminated: ${data.statistics.terminated}`
+      ];
+      
+      stats.forEach(stat => {
+        doc.text(stat, 20, yPosition);
+        yPosition += 6;
+      });
+      yPosition += 5;
+    }
+
+    // Filters applied
+    if (filters.department || filters.status || searchTerm) {
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Filters Applied:', 14, yPosition);
+      yPosition += 6;
+      if (filters.department) {
+        doc.text(`Department: ${filters.department}`, 20, yPosition);
+        yPosition += 6;
+      }
+      if (filters.status) {
+        doc.text(`Status: ${filters.status}`, 20, yPosition);
+        yPosition += 6;
+      }
+      if (searchTerm) {
+        doc.text(`Search: ${searchTerm}`, 20, yPosition);
+        yPosition += 6;
+      }
+      yPosition += 5;
+    }
+
+    // Employee Table
+    const tableData = filteredEmployees.map(emp => [
+      emp.name || 'N/A',
+      emp.email || 'N/A',
+      emp.department || 'N/A',
+      emp.position || 'N/A',
+      emp.status || 'N/A',
+      emp.joinDate ? new Date(emp.joinDate).toLocaleDateString() : 'N/A'
+    ]);
+
+    doc.autoTable({
+      startY: yPosition,
+      head: [['Name', 'Email', 'Department', 'Position', 'Status', 'Join Date']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 10
+      },
+      bodyStyles: {
+        fontSize: 9,
+        textColor: [0, 0, 0]
+      },
+      alternateRowStyles: {
+        fillColor: [245, 247, 250]
+      },
+      margin: { top: yPosition, left: 14, right: 14 },
+      styles: {
+        cellPadding: 3,
+        overflow: 'linebreak',
+        cellWidth: 'wrap'
+      },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 35 },
+        4: { cellWidth: 25 },
+        5: { cellWidth: 30 }
+      }
+    });
+
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Page ${i} of ${pageCount}`,
+        pageWidth / 2,
+        pageHeight - 10,
+        { align: 'center' }
+      );
+    }
+
+      // Save the PDF
+      const fileName = `Employee_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again or check the console for details.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="reports-container">
@@ -70,8 +212,9 @@ const EmployeeReport = () => {
           Employee Report
         </h1>
         <button
-          onClick={() => alert('Export functionality coming soon')}
+          onClick={generatePDF}
           className="btn btn-success"
+          disabled={loading || !data || !filteredEmployees.length}
         >
           <DocumentIcon size={20} color="white" style={{ marginRight: '8px' }} />
           Export PDF
