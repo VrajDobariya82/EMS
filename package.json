@@ -1,0 +1,13 @@
+{
+  "name": "ems",
+  "version": "1.0.0",
+  "description": "Employee Management System",
+  "private": true,
+  "scripts": {
+    "install-frontend": "cd frontend && npm install",
+    "install-backend": "cd backend && npm install",
+    "install-all": "npm run install-frontend && npm run install-backend",
+    "build": "cd frontend && npm run build"
+  }
+}
+
